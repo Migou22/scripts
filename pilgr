@@ -1,0 +1,578 @@
+local plr = game:GetService("Players").LocalPlayer
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local roll = ReplicatedStorage.Remotes.Roll
+local block = ReplicatedStorage.Remotes.Block
+
+getgenv().Fly = false
+getgenv().GM = false
+getgenv().AP = false
+--ws hook stuff
+if not getgenv().MTAPIMutex then
+    if getgenv().MTAPIMutex ~= nil then
+        return
+    end
+    local function a()
+        if is_protosmasher_caller ~= nil then
+            return 0
+        end
+        if elysianexecute ~= nil then
+            return 1
+        end
+        if fullaccess ~= nil then
+            return 2
+        end
+        if Synapse ~= nil then
+            return 3
+        end
+        return 4
+    end
+    local function b()
+        local c = a()
+        if c == 0 then
+            return is_protosmasher_caller
+        end
+        if c == 1 or c == 3 then
+            return checkcaller
+        end
+        if c == 2 then
+            return IsLevel7
+        end
+        return nil
+    end
+    if a() == 2 then
+        error("mt-api: Exploit not supported")
+    end
+    local d = {}
+    local e = {}
+    local f = {}
+    local g = {}
+    local h = {}
+    local i = {}
+    local j = {}
+    local k = {}
+    local function l()
+        local m = a()
+        local n = b()
+        local o = getrawmetatable(game)
+        if m == 0 then
+            make_writeable(o)
+        elseif m == 2 then
+            fullaccess(o)
+        else
+            setreadonly(o, false)
+        end
+        local p = o.__index
+        local q = o.__newindex
+        local r = o.__namecall
+        o.__index =
+            newcclosure(
+            function(s, t)
+                if n() then
+                    return p(s, t)
+                end
+                if d[s] and d[s][t] then
+                    local u = d[s][t]
+                    if u["IsCallback"] == true then
+                        return u["Value"](s)
+                    else
+                        return u["Value"]
+                    end
+                end
+                if g[t] then
+                    local v = g[t]
+                    if v["IsCallback"] == true then
+                        return v["Value"](s)
+                    else
+                        return v["Value"]
+                    end
+                end
+                if j[s] and j[s][t] then
+                    return k[s][t]
+                end
+                return p(s, t)
+            end
+        )
+        o.__newindex =
+            newcclosure(
+            function(w, x, y)
+                if n() then
+                    return q(w, x, y)
+                end
+                if e[w] and e[w][x] then
+                    local z = e[w][x]
+                    if z["Callback"] == nil then
+                        return
+                    else
+                        z["Callback"](w, y)
+                        return
+                    end
+                end
+                if h[x] then
+                    local A = h[x]
+                    if A["Callback"] == nil then
+                        return
+                    else
+                        A["Callback"](w, y)
+                        return
+                    end
+                end
+                if j[w] and j[w][x] then
+                    local B = j[w][x]
+                    if type(y) ~= B["Type"] then
+                        error(
+                            "bad argument #3 to '" ..
+                                x .. "' (" .. B["Type"] .. " expected, got " .. type(x) .. ")"
+                        )
+                    end
+                    k[w][x] = y
+                    return
+                end
+                return q(w, x, y)
+            end
+        )
+        local C = isluau and isluau() or false
+        o.__namecall =
+            newcclosure(
+            function(D, ...)
+                local E = {...}
+                local F = C and getnamecallmethod() or table.remove(E)
+                if n() then
+                    if F == "AddGetHook" then
+                        if #E < 1 then
+                            error("mt-api: Invalid argument count")
+                        end
+                        local G = E[1]
+                        local H = E[2]
+                        local I = E[3]
+                        if type(G) ~= "string" then
+                            error("mt-api: Invalid hook type")
+                        end
+                        if not d[D] then
+                            d[D] = {}
+                        end
+                        if I == true and type(H) ~= "function" then
+                            error("mt-api: Invalid callback function")
+                        end
+                        d[D][G] = {Value = H, IsCallback = I}
+                        local J = function()
+                            d[D][G] = nil
+                        end
+                        return {remove = J, Remove = J}
+                    end
+                    if F == "AddGlobalGetHook" then
+                        local K = E[1]
+                        local L = E[2]
+                        local M = E[3]
+                        if type(K) ~= "string" then
+                            error("mt-api: Invalid hook type")
+                        end
+                        if M == true and type(L) ~= "function" then
+                            error("mt-api: Invalid callback function")
+                        end
+                        g[K] = {Value = L, IsCallback = M}
+                        local N = function()
+                            g[K] = nil
+                        end
+                        return {remove = N, Remove = N}
+                    end
+                    if F == "AddSetHook" then
+                        if #E < 1 then
+                            error("mt-api: Invalid argument count")
+                        end
+                        local O = E[1]
+                        local P = E[2]
+                        if type(O) ~= "string" then
+                            error("mt-api: Invalid hook type")
+                        end
+                        if not e[D] then
+                            e[D] = {}
+                        end
+                        if type(P) == "function" then
+                            e[D][O] = {Callback = P}
+                        else
+                            e[D][O] = {Callback = nil}
+                        end
+                        local Q = function()
+                            e[D][O] = nil
+                        end
+                        return {remove = Q, Remove = Q}
+                    end
+                    if F == "AddGlobalSetHook" then
+                        if #E < 1 then
+                            error("mt-api: Invalid argument count")
+                        end
+                        local R = E[1]
+                        local S = E[2]
+                        if type(R) ~= "string" then
+                            error("mt-api: Invalid hook type")
+                        end
+                        if type(S) == "function" then
+                            h[R] = {Callback = S}
+                        else
+                            h[R] = {Callback = nil}
+                        end
+                        local T = function()
+                            h[R] = nil
+                        end
+                        return {remove = T, Remove = T}
+                    end
+                    if F == "AddCallHook" then
+                        if #E < 2 then
+                            error("mt-api: Invalid argument count")
+                        end
+                        local U = E[1]
+                        local V = E[2]
+                        if type(U) ~= "string" then
+                            error("mt-api: Invalid hook type")
+                        end
+                        if type(V) ~= "function" then
+                            error("mt-api: Invalid argument #2 (not function)")
+                        end
+                        if not f[D] then
+                            f[D] = {}
+                        end
+                        f[D][U] = {Callback = V}
+                        local W = function()
+                            f[D][U] = nil
+                        end
+                        return {remove = W, Remove = W}
+                    end
+                    if F == "AddGlobalCallHook" then
+                        if #E < 2 then
+                            error("mt-api: Invalid argument count")
+                        end
+                        local X = E[1]
+                        local Y = E[2]
+                        if type(X) ~= "string" then
+                            error("mt-api: Invalid hook type")
+                        end
+                        if type(Y) ~= "function" then
+                            error("mt-api: Invalid argument #2 (not function)")
+                        end
+                        i[X] = {Callback = Y}
+                        local Z = function()
+                            i[X] = nil
+                        end
+                        return {remove = Z, Remove = Z}
+                    end
+                    if F == "AddPropertyEmulator" then
+                        if #E < 1 then
+                            error("mt-api: Invalid argument count")
+                        end
+                        local _ = E[1]
+                        if type(_) ~= "string" then
+                            error("mt-api: Invalid hook type")
+                        end
+                        local a0 = p(D, _)
+                        local a1 = type(a0)
+                        if not j[D] then
+                            j[D] = {}
+                        end
+                        if not k[D] then
+                            k[D] = {}
+                        end
+                        j[D][_] = {Type = a1}
+                        k[D][_] = p(D, _)
+                        local a2 = function()
+                            j[D][_] = nil
+                            k[D][_] = nil
+                        end
+                        return {remove = a2, Remove = a2}
+                    end
+                    return r(D, ...)
+                end
+                if f[D] and f[D][F] then
+                    local a3 = f[D][F]
+                    return a3["Callback"](p(D, F), unpack(E))
+                end
+                if i[F] then
+                    local a4 = i[F]
+                    return a4["Callback"](D, p(D, F), unpack(E))
+                end
+                return r(D, ...)
+            end
+        )
+        if m == 0 then
+            make_readonly(o)
+        elseif m == 2 then
+        else
+            setreadonly(o, true)
+        end
+    end
+    l()
+    getgenv().MTAPIMutex = true -- Network Spoofer for it, ez
+    game.Players.LocalPlayer.Character.Humanoid:AddPropertyEmulator("WalkSpeed")
+    game.Players.LocalPlayer.Character.Humanoid:AddPropertyEmulator("JumpPower")
+end
+   --functions--
+function godmode()
+      while getgenv().GM == true do
+    roll:FireServer()
+    task.wait(.1)
+      end
+end
+function AP()
+  while getgenv().AP == true do
+    block:FireServer(true)
+    task.wait(.1)
+    block:FireServer(false)
+      end
+end
+--gui lib stuff--
+loadstring(game:HttpGet("https://pastebin.com/raw/06MMJp4c", true))() -- ESP Initiation
+local ESP = shared.uESP
+ESP.Enabled = false
+ESP.Settings.Box3D = false
+ESP.Settings.DrawTracers = false
+ESP.Settings.DrawDistance = false
+ESP.Settings.DrawNames = false
+ESP.Settings.TextOutline = false
+ESP.Settings.VisibilityCheck = false
+ESP.Settings.TeamColor = Color3.fromRGB(255,255,255)
+ESP.Settings.EnemyColor = Color3.fromRGB(0, 255, 127)
+local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/shlexware/Rayfield/main/source'))()
+local Window = Rayfield:CreateWindow({
+   Name = "Pilgrammed",
+   LoadingTitle = "Pilgrammed",
+   LoadingSubtitle = "by Miggy",
+   ConfigurationSaving = {
+      Enabled = true,
+      FolderName = nil, -- Create a custom folder for your hub/game
+      FileName = "Pilgrammed"
+   },
+   Discord = {
+      Enabled = true,
+      Invite = "", -- The Discord invite code, do not include discord.gg/. E.g. discord.gg/ABCD would be ABCD.
+      RememberJoins = true -- Set this to false to make them join the discord every time they load it up
+   },
+   KeySystem = false, -- Set this to true to use our key system
+   KeySettings = {
+      Title = "Sirius Hub",
+      Subtitle = "Key System",
+      Note = "Join the discord (discord.gg/sirius)",
+      FileName = "SiriusKey",
+      SaveKey = true,
+      GrabKeyFromSite = false, -- If this is true, set Key below to the RAW site you would like Rayfield to get the key from
+      Key = "Hello"
+   }
+})
+local Tab = Window:CreateTab("Main", 4483362458)
+local Tab3 = Window:CreateTab("ESP", 4483362458)
+local Tab2 = Window:CreateTab("Misc", 4483362458) -- Title, Image
+local Section = Tab:CreateSection("Auto Stuff")
+--features--
+local Toggle = Tab:CreateToggle({
+   Name = "Iframes",
+   CurrentValue = false,
+   Flag = "Toggle1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+ getgenv().GM = Value
+ godmode()
+   end,
+})
+
+local Toggle = Tab:CreateToggle({
+   Name = "Auto Parry (only use when fighting so the game doesnt lag)",
+   CurrentValue = false,
+   Flag = "Toggle2", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+ getgenv().AP = Value
+ AP()
+   end,
+})
+
+local Button = Tab2:CreateButton({
+   Name = "Rejoin Server",
+   Callback = function()
+   game:GetService("TeleportService"):Teleport(game.PlaceId, game:GetService("Players").LocalPlayer, game.JobId)
+   end,
+})
+local Button = Tab2:CreateButton({
+   Name = "Server Hop",
+   Callback = function()
+   game:GetService("TeleportService"):Teleport(game.PlaceId, game:GetService("Players").LocalPlayer)
+   end,
+})
+local WSSlider = Tab2:CreateSlider({
+   Name = "WalkSpeed",
+   Range = {20, 150},
+   Increment = 10,
+   Suffix = "WS",
+   CurrentValue = plr.Character.Humanoid.WalkSpeed,
+   Flag = "WSSlider", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+       plr.Character.Humanoid.WalkSpeed = Value
+   end,
+})
+
+local Slider = Tab2:CreateSlider({
+   Name = "JumpPower",
+   Range = {50, 150},
+   Increment = 10,
+   Suffix = "JP",
+   CurrentValue = plr.Character.Humanoid.JumpPower,
+   Flag = "JpSlider", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+       plr.Character.Humanoid.JumpPower = Value
+   end,
+})
+
+local FlightToggle = Tab2:CreateToggle({
+    Name = "Fly ",
+    CurrentValue = false,
+    Flag = "FlyToggle", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+    Callback = function(Value)
+        getgenv().Fly = Value
+        local Max = 0
+local Players = game:GetService("Players")
+local LP = Players.LocalPlayer
+local Mouse = LP:GetMouse()
+Max = Max + 1
+if Fly then
+   local T =
+       LP.Character:FindFirstChildWhichIsA("Humanoid").RigType == Enum.HumanoidRigType.R6 and
+       LP.Character:FindFirstChild("HumanoidRootPart") or
+       LP.Character:FindFirstChildWhichIsA("Humanoid").RigType == Enum.HumanoidRigType.R15 and
+           LP.Character:FindFirstChild("UpperTorso")
+   local S = {
+       F = 0,
+       B = 0,
+       L = 0,
+       R = 0
+   }
+   local S2 = {
+       F = 0,
+       B = 0,
+       L = 0,
+       R = 0
+   }
+   local SPEED = 5
+   local function FLY()
+       local BodyGyro = Instance.new("BodyGyro", T)
+       local BodyVelocity = Instance.new("BodyVelocity", T)
+       BodyGyro.P = 9e4
+       BodyGyro.maxTorque = Vector3.new(9e9, 9e9, 9e9)
+       BodyGyro.cframe = T.CFrame
+       BodyVelocity.velocity = Vector3.new(0, 0.1, 0)
+       BodyVelocity.maxForce = Vector3.new(9e9, 9e9, 9e9)
+       spawn(
+           function()
+               repeat
+                   wait()
+                   LP.Character.Humanoid.PlatformStand = true
+                   if S.L + S.R ~= 0 or S.F + S.B ~= 0 then
+                       SPEED = 200
+                   elseif not (S.L + S.R ~= 0 or S.F + S.B ~= 0) and SPEED ~= 0 then
+                       SPEED = 0
+                   end
+                   if (S.L + S.R) ~= 0 or (S.F + S.B) ~= 0 then
+                       BodyVelocity.velocity =
+                           ((game:GetService("Workspace").CurrentCamera.CoordinateFrame.lookVector * (S.F + S.B)) +
+                           ((game:GetService("Workspace").CurrentCamera.CoordinateFrame *
+                               CFrame.new(S.L + S.R, (S.F + S.B) * 0.2, 0).p) -
+                               game:GetService("Workspace").CurrentCamera.CoordinateFrame.p)) *
+                           SPEED
+                       S2 = {
+                           F = S.F,
+                           B = S.B,
+                           L = S.L,
+                           R = S.R
+                       }
+                   elseif (S.L + S.R) == 0 and (S.F + S.B) == 0 and SPEED ~= 0 then
+                       BodyVelocity.velocity =
+                           ((game:GetService("Workspace").CurrentCamera.CoordinateFrame.lookVector * (S2.F + S2.B)) +
+                           ((game:GetService("Workspace").CurrentCamera.CoordinateFrame *
+                               CFrame.new(S2.L + S2.R, (S2.F + S2.B) * 0.2, 0).p) -
+                               game:GetService("Workspace").CurrentCamera.CoordinateFrame.p)) *
+                           SPEED
+                   else
+                       BodyVelocity.velocity = Vector3.new(0, 0.1, 0)
+                   end
+                   BodyGyro.cframe = game:GetService("Workspace").CurrentCamera.CoordinateFrame
+               until not Fly
+               S = {
+                   F = 0,
+                   B = 0,
+                   L = 0,
+                   R = 0
+               }
+               S2 = {
+                   F = 0,
+                   B = 0,
+                   L = 0,
+                   R = 0
+               }
+               SPEED = 0
+               BodyGyro:destroy()
+               BodyVelocity:destroy()
+               LP.Character.Humanoid.PlatformStand = false
+           end
+       )
+   end
+   Mouse.KeyDown:connect(
+       function(k)
+           if k:lower() == "w" then
+               S.F = 1
+           elseif k:lower() == "s" then
+               S.B = -1
+           elseif k:lower() == "a" then
+               S.L = -1
+           elseif k:lower() == "d" then
+               S.R = 1
+           end
+       end
+   )
+   Mouse.KeyUp:connect(
+       function(k)
+           if k:lower() == "w" then
+               S.F = 0
+           elseif k:lower() == "s" then
+               S.B = 0
+           elseif k:lower() == "a" then
+               S.L = 0
+           elseif k:lower() == "d" then
+               S.R = 0
+           end
+       end
+   )
+   if Fly then
+       FLY()
+   end
+   if not Fly then
+       FLY()
+   end
+   if Max == 2 then
+       Fly = false
+       Max = 0
+   end
+end
+
+    end,
+ })
+ 
+ local Keybind = Tab2:CreateKeybind({
+   Name = "Fly Keybind",
+   CurrentKeybind = "V",
+   HoldToInteract = false,
+   Flag = "Keybind1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Keybind)
+    if getgenv().Fly == false then
+    FlightToggle:Set(true)
+    elseif getgenv().Fly == true then
+        wait(0.1)
+    FlightToggle:Set(false)
+   end
+   end,
+})
+ 
+local Toggle = Tab3:CreateToggle({
+    Name = "Esp ",
+    CurrentValue = false,
+    Flag = "EspToggle", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+    Callback = function(Value)
+        ESP.Enabled = Value
+        ESP.Settings.DrawDistance = Value
+        ESP.Settings.DrawNames = Value
+    end,
+ })
+ Rayfield:LoadConfiguration()
